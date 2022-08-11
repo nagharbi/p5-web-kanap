@@ -3,9 +3,9 @@ let urlLocale = window.location.search;
 console.log(urlLocale); 
 let params = new URLSearchParams(urlLocale);
 console.log(params);
+let id = params.get('id');
 
 if (params.has('id')) {
-    let id = params.get('id');
      fetch('http://localhost:3000/api/products/' + id)
      .then(response => response.json())
      .then(data => {
@@ -46,6 +46,50 @@ function afficherProduits(data) {
 let button = document.getElementById('addToCart');
 button.addEventListener('click', function() {
     console.log('Click sur button');
-    let objet = { name: 'shd' };
-    localStorage.setItem('ajouter', JSON.stringify(objet));
+    let title = document.getElementById('title');
+    let name = title.textContent;
+    let eltQuantity = document.getElementById('quantity');
+    let quantity = parseInt(eltQuantity.value, 10);
+    let eltColors = document.getElementById('colors');
+    // Pour récuperer la valeur de la couleur sélectionner 
+    let color = eltColors.value;
+    if (!color) {
+        alert ('Choisir une couleur!')
+        return;
+    }
+
+    if (quantity < 1 || quantity > 100) {
+        alert ('Choisir une quantité valide!')
+        return;
+    }
+
+    let produit = { id: id, name: name, color: color, quantity: quantity };
+    addProduct(produit);
 });
+
+// Sauvegarder un produit
+function saveProduct(valeur) {
+    localStorage.setItem("produits", JSON.stringify(valeur));
+}
+
+// Recuperer tous les produits qui sont sauvegarder dans localstorage
+function getAllProduct() {
+    let produits = localStorage.getItem("produits");
+    if (produits == null) {
+        return [];
+    } else {
+        return JSON.parse(produits);
+    }
+}
+
+// Ajouter les produits au panier
+function addProduct(product) {
+    let products = getAllProduct();
+    let rechercheProduit = products.find(p => p.id == product.id && p.color == product.color);
+    if (rechercheProduit != undefined) {
+        rechercheProduit.quantity = rechercheProduit.quantity + product.quantity;
+    } else {
+        products.push(product);
+    }
+    saveProduct(products);
+}

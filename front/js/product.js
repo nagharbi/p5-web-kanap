@@ -87,9 +87,16 @@ function addProduct(product) {
     let products = getAllProduct();
     let rechercheProduit = products.find(p => p.id == product.id && p.color == product.color);
     if (rechercheProduit != undefined) {
+       if(rechercheProduit.quantity + product.quantity > 100){
+        alert('choisir une quantité valide')
+        return
+       } else {
         rechercheProduit.quantity = rechercheProduit.quantity + product.quantity;
+       }
     } else {
         products.push(product);
+
     }
     saveProduct(products);
+    alert ('le produit à étè ajouter');
 }

@@ -1,4 +1,4 @@
-let produits = JSON.parse(localStorage.getItem("produits"));
+let produits = JSON.parse(localStorage.getItem("produits")) || [];
 console.log(produits);
 
 let totaleQuantity = 0 
@@ -104,8 +104,17 @@ function cart (produit, data) {
     pDeleteItem.addEventListener("click" , function(event){
         let supprimer = event.target;
         let article = supprimer.closest('.cart__item');
+        let dataId = article.getAttribute('data-id')
+        let datacolor = article.getAttribute('data-color')
+        let removeproduct = produits.find(prod => prod.id == dataId && prod.color == datacolor);
+        totaleQuantity -= removeproduct.quantity
+        idTotaleQuantity.textContent = totaleQuantity
+        totalePrice -= removeproduct.quantity * data.price;
+        idTotalePrice.textContent = totalePrice;
+        produits = produits.filter(prod => prod.id !== dataId || prod.color !== datacolor )
+        localStorage.setItem("produits", JSON.stringify(produits));
         article.remove();
-    })
+    });
     
     // Ajouter les divs cart__item__content__settings__quantity et cart__item__content__settings__delete sous le div parent cart__item__content__settings
     divSettings.appendChild(divSettingsQuantity);
@@ -126,25 +135,62 @@ function cart (produit, data) {
 function modifierProduit (produit, nouvelleQuantity, price) {
     console.log(nouvelleQuantity)
     let diffQuantity = nouvelleQuantity - produit.quantity;
-    produit.quantity = nouvelleQuantity;
+    produit.quantity = Number(nouvelleQuantity);
     totaleQuantity += diffQuantity
     idTotaleQuantity.textContent = totaleQuantity
     totalePrice += diffQuantity * price;
     idTotalePrice.textContent = totalePrice;
+    localStorage.setItem("produits", JSON.stringify(produits));
 }
  let commander = document.getElementById('order');
 
  commander.addEventListener('click', f_commander);
 
  function f_commander(event){
-    validationFirstName(event);
-    validationLastName(event);
-    validationAdresse(event);
-    validationaVille(event);
-    validationaEmail(event);
- }
- 
- //
+    event.preventDefault();
+    if (produits.length == 0 ){
+        alert('votre panier est vide');
+        return;
+    }
+
+    if (
+        validationFirstName(event) &&
+        validationLastName(event) &&
+        validationAdresse(event) &&
+        validationaVille(event) &&
+        validationaEmail(event)
+    ) {
+        let productsIds = produits.map(prod => prod.id);
+
+        let contact = {
+            firstName: prenom.value,
+            lastName: nom.value,
+            address: adresse.value,
+            city: ville.value,
+            email: email.value
+        };
+
+        let data = {
+            products: productsIds,
+            contact: contact
+        };
+
+        fetch ('http://localhost:3000/api/products/order', {
+            method : 'post',
+            headers : {
+                'content-type': 'application/json',
+                'accept': 'application/json'
+            },
+            body : JSON.stringify(data)
+        }).then(response => response.json())
+        .then (response => {
+            localStorage.clear();
+            location.href = 'confirmation.html?orderId='+ response.orderId;
+            console.log(response);
+        });
+    }
+}
+
 let prenom = document.getElementById('firstName');
 let prenom_error = document.getElementById('firstNameErrorMsg');
 let prenom_valeur = /^[a-zA-ZéèïíÉÈÍÏ][a-zéèïíçâä]+([-'\s][a-zA-ZéèïíÉÈÍÏ][a-zéèïíçâä]+)?/;
@@ -155,13 +201,16 @@ function validationFirstName(event){
         prenom_error.textContent ='Veuillez saisir votre prénom !';
         prenom_error.style.color ='red';
         prenom_error.style.background_color ='red';
+        return false;
  
     } else if (prenom_valeur.test(prenom.value) == false) {
         event.preventDefault();
         prenom_error.textContent = 'Le prenom est incorrect !'
         prenom_error.style.color ='orange';
+        return false;
     } else {
         prenom_error.textContent ='';
+        return true;
     }
 }
 
@@ -175,15 +224,19 @@ function validationLastName(event) {
         nom_error.textContent = 'veuillez saisir votre nom';
         nom_error.style.color ='red';
         nom_error.style.background_color ='red';
-    } else if ( nom_valeur.test(nom.value)== false){
+        return false;
+    } else if ( nom_valeur.test(nom.value)== false) {
         event.preventDefault();
         nom_error.textContent = 'Le nom est incorrect !'
         nom_error.style.color ='orange';
         nom_error.style.background_color ='orange';
+        return false;
     } else {
         nom_error.textContent = '';
+        return true;
     }
 }
+
 let adresse = document.getElementById('address');
 let adresse_error = document.getElementById('addressErrorMsg');
 let adresse_valeur =/^([0-9]*) ?([a-zA-Z,\. ]*) ?([0-9]{5}) ?([a-zA-Z])*/
@@ -194,13 +247,16 @@ function validationAdresse (event){
         adresse_error.textContent ='veuillez saisir votre adresse '
         adresse_error.style.color ='red';
         adresse_error.style.background_color ='red';
-    }else if (adresse_valeur.test(adresse.value) == false){
+        return false;
+    } else if (adresse_valeur.test(adresse.value) == false) {
         event.preventDefault();
         adresse_error.textContent = 'adresse incorrect !'
         adresse_error.style.color ='orange';
         adresse_error.style.background_color ='orange';
-    }else{
+        return false;
+    } else {
         adresse_error.textContent ='';
+        return true;
     }
 }
 
@@ -208,19 +264,22 @@ let ville = document.getElementById('city');
 let ville_error = document.getElementById('cityErrorMsg');
 let ville_valeur =/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/
 
-function validationaVille (event){
-    if (ville.validity.valueMissing){
+function validationaVille (event) {
+    if (ville.validity.valueMissing) {
         event.preventDefault();
         ville_error.textContent ='veuillez saisir votre ville '
         ville_error.style.color ='red';
         ville_error.style.background_color ='red';
-    }else if (ville_valeur.test(ville.value) == false){
+        return false;
+    } else if (ville_valeur.test(ville.value) == false) {
         event.preventDefault();
         ville_error.textContent = 'ville incorrect !'
         ville_error.style.color ='orange';
         ville_error.style.background_color ='orange';
-    }else{
+        return false;
+    } else {
         ville_error.textContent ='';
+        return true;
     }
 }
 
@@ -229,17 +288,20 @@ let email_error = document.getElementById('emailErrorMsg');
 let email_valeur = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 function validationaEmail (event){
-    if (email.validity.valueMissing){
+    if (email.validity.valueMissing) {
         event.preventDefault();
         email_error.textContent ='veuillez saisir votre email '
         email_error.style.color ='red';
         email_error.style.background_color ='red';
-    }else if (email_valeur.test(email.value) == false){
+        return false;
+    } else if (email_valeur.test(email.value) == false) {
         event.preventDefault();
         email_error.textContent = 'email est incorrect !'
         email_error.style.color ='orange';
         email_error.style.background_color ='orange';
-    }else{
+        return false;
+    } else {
         email_error.textContent ='';
+        return true;
     }
 }

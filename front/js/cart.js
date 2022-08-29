@@ -1,11 +1,19 @@
+// Récupérer le tableau des produits depuis localStorage.
+// On retourne un tableau vide [] si pas de produit sous localStorage.
 let produits = JSON.parse(localStorage.getItem("produits")) || [];
 console.log(produits);
 
-let totaleQuantity = 0 
-let totalePrice = 0
+let totaleQuantity = 0;
+let totalePrice = 0;
 let idTotaleQuantity = document.getElementById('totalQuantity');
 let idTotalePrice = document.getElementById('totalPrice');
-function recupererProduit (produit) {
+
+/**
+ * Récupérer le produit
+ *
+ * @param produit 
+ */
+function recupererProduit(produit) {
     fetch('http://localhost:3000/api/products/' + produit.id)
     .then(response => response.json())
     .then(data => {
@@ -19,10 +27,10 @@ function recupererProduit (produit) {
 }
 
 for (let i = 0; i < produits.length ; i++) {
-    recupererProduit (produits[i]);
+    recupererProduit(produits[i]);
 }
 
-function cart (produit, data) {
+function cart(produit, data) {
     let article = document.createElement('article');
     article.className = 'cart__item';
     article.setAttribute('data-id', produit.id);
@@ -132,7 +140,7 @@ function cart (produit, data) {
     section.appendChild(article);
 }
 
-function modifierProduit (produit, nouvelleQuantity, price) {
+function modifierProduit(produit, nouvelleQuantity, price) {
     console.log(nouvelleQuantity)
     let diffQuantity = nouvelleQuantity - produit.quantity;
     produit.quantity = Number(nouvelleQuantity);
@@ -142,11 +150,11 @@ function modifierProduit (produit, nouvelleQuantity, price) {
     idTotalePrice.textContent = totalePrice;
     localStorage.setItem("produits", JSON.stringify(produits));
 }
- let commander = document.getElementById('order');
 
- commander.addEventListener('click', f_commander);
+let commander = document.getElementById('order');
+commander.addEventListener('click', f_commander);
 
- function f_commander(event){
+function f_commander(event) {
     event.preventDefault();
     if (produits.length == 0 ){
         alert('votre panier est vide');
@@ -182,11 +190,12 @@ function modifierProduit (produit, nouvelleQuantity, price) {
                 'accept': 'application/json'
             },
             body : JSON.stringify(data)
-        }).then(response => response.json())
-        .then (response => {
+        })
+        .then(response => response.json())
+        .then(data => {
             localStorage.clear();
-            location.href = 'confirmation.html?orderId='+ response.orderId;
-            console.log(response);
+            location.href = 'confirmation.html?orderId='+ data.orderId;
+            console.log(data);
         });
     }
 }

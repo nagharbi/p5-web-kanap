@@ -1,5 +1,10 @@
-let url_courant = window.location.search;
-let params = new URLSearchParams(url_courant);
-let id = params.get('orderId');
+// Retourner les paramètres de l'url courant
+let urlCourant = window.location.search;
+// URLSearchParams traite l'url search pour récuperer les paramètres.
+let params = new URLSearchParams(urlCourant);
+// Renvoie la valeur d'orderId associée au paramètre de recherche.
+let orderId = params.get('orderId');
+// Récupérer l'élément qui contient l'id orderId
 let eltOrderId = document.getElementById('orderId');
-eltOrderId.textContent = id;
+// Remplir le contenu de l'élément avec l'orderId
+eltOrderId.textContent = orderId;

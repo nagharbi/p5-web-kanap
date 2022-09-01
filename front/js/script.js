@@ -1,10 +1,6 @@
-let section = document.getElementById('items');
 
-/**
- * Créer et afficher le bloc HTML de la carte par produit
- *
- * @param produit 
- */
+// Créer la fonction carte pour afficher le contenu HTML de chaque produit
+let section = document.getElementById('items');
 function carte (produit) {
     // Créer l'element <a> qui contient le lien vers la page produit.
     let a = document.createElement('a');
@@ -40,18 +36,15 @@ function carte (produit) {
     article.appendChild(text);
 }
 
-// Appel de l'API
-// On appelle la méthode fetch avec l'URL de notre API comme argument
 // --- pour récupérer les produits disponible dans le serveur
 fetch('http://localhost:3000/api/products')
-    .then(response => response.json()) // Fetch nous renvoie une promise, si l'API répond then() sera exécutée, ici pour récupérer le résultat via un JSON
-    .then(data => { // Et ensuite le résultat sera traité afin d'être exploitable pour notre application 
+    .then(response => response.json()) 
+    .then(data => { 
         console.log(data);
-        // data.length récupérer le nombre total d'un tableau (data)
-        // Le boucle for est créé pour parcourir chaque produit disponible.  
+        // Le boucle for pour parcourir chaque produit disponible.  
         for (let i = 0; i < data.length; i++) {
             let produit = data[i];
-            // Appeler la fonction carte pour afficher les détails du produit dans le DOM
+            // Appeler la fonction carte pour afficher les détails du produit HTML
             carte(produit);
         }
     });

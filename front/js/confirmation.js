@@ -1,3 +1,5 @@
+//recupere l'orderId qui se trouve dans l'url  et j'ai afficher dans le HTML
+
 // Retourner les paramètres de l'url courant
 let urlCourant = window.location.search;
 // URLSearchParams traite l'url search pour récuperer les paramètres.

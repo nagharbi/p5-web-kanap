@@ -1,32 +1,32 @@
-// Retourner les paramètres de l'url courant
+// afficher le produit selectionner
+
+// 1- recuperer l'Id de  produit sélectionner (qui se trouve dans URL): 
+
 let urlCourant = window.location.search;
 console.log(urlCourant);
-// URLSearchParams traite l'url search pour récuperer les paramètres. 
 let params = new URLSearchParams(urlCourant);
 console.log(params);
-// get => renvoie la valeur de l'id associée au paramètre de recherche
+
+// 2- get renvoie la valeur de l'id associée au paramètre de recherche:
+
 let id = params.get('id');
 
-// has => Vérifier si le paramètre de recherche id existe ou non
+// 3 - Vérifier si le paramètre de recherche à un ID ou nom :
+
 if (params.has('id')) {
-    // Appel de l'API
-    // On demande uniquement le produit lié à l'id
      fetch('http://localhost:3000/api/products/' + id)
      .then(response => response.json())
      .then(data => {
         console.log(data);
-        // Afficher le produit récupérer depuis l'API
+        // Afficher le produit récupérer depuis l'API par ID
         afficherProduits(data);
      })
 } else {
     console.error("L'id est obligztoire !");
 }
 
-/**
- * Créer et afficher le HTML qui contient le détail du produit
- *
- * @param produit 
- */
+// afficher le contenu et  détail du produit
+
 function afficherProduits(produit) {
     //Remplir le titre de la page par le nom du produit.
     document.title = produit.name;
@@ -69,10 +69,11 @@ function afficherProduits(produit) {
     }
 }
 
-// Récupérer l'élément <button> qui contient l'id addToCart
+// au moment de clique
+
+// 1- Ajouter un event click à l'élément <button> (ajouter au panier):
+
 let button = document.getElementById('addToCart');
-// Ajouter un event click à l'élément <button>
-// addEventListener sera appeler dés qu'on clique sur le boutton Ajouter au panier.
 button.addEventListener('click', function() {
     console.log('Click sur button');
     let title = document.getElementById('title');
@@ -96,27 +97,26 @@ button.addEventListener('click', function() {
         return;
     }
 
-    // Créer un objet produit contenant l'id, le nom du produit, la couleur et la quantité.
+    // 2 - Créer un objet produit contenant (l'id, le nom du produit, la couleur et la quantité).
+
     let produit = { id: id, name: name, color: color, quantity: quantity };
     // Ajouter l'objet produit au localstorage.
     addProduct(produit);
 });
 
 
-/**
- * Sauvegarder le tableau des produits ajouter au panier.
- *
- * @param produits
- */
+// la gestion de la localStorage
+
+// 1 - Sauvegarder le tableau des produits dans le localStorage.
+
+//// (setItem => ajouter le tableau des produits au clé "produits" du localStorage).
+////(JSON.stringify => permet de convertir un tableau ou un objet en chaîne JSON).
 function saveProduct(produits) {
-    // setItem => ajouter le tableau des produits au clé "produits" du localStorage.
-    // JSON.stringify => permet de convertir un tableau ou un objet en chaîne JSON.
     localStorage.setItem("produits", JSON.stringify(produits));
 }
 
-/**
- * Récupérer tous les produits qui sont sauvegarder sous localStorage.
- */
+ // 2 - Récupérer tous les produits qui sont sauvegarder sous localStorage.
+
 function getAllProduct() {
     // getItem => récupérer les produits depuis localStorage avec le clé "produits"
     let produits = localStorage.getItem("produits");
@@ -127,11 +127,8 @@ function getAllProduct() {
     }
 }
 
-/**
- * Ajouter un produit au panier.
- *
- * @param produit
- */
+// 3 - verifier si le produit existe dans le localStorage.
+
 function addProduct(produit) {
     // Récupérer tous les produits qui sont sauvegarder sous localStorage.
     let produits = getAllProduct();
